@@ -66,6 +66,23 @@ export const appRouter = router({
         return { room, teams, players };
       }),
   }),
+  solo: router({
+    getRandomQuestions: publicProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null && "culturalPackId" in val && "count" in val) {
+          return val as { culturalPackId: number; count: number };
+        }
+        throw new Error("Invalid input");
+      })
+      .query(async ({ input }) => {
+        const { getQuestionsByCulturalPack } = await import("./gameDb");
+        const allQuestions = await getQuestionsByCulturalPack(input.culturalPackId);
+        
+        // Shuffle and take requested count
+        const shuffled = allQuestions.sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, input.count);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

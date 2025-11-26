@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Users, Gamepad2 } from "lucide-react";
+import { Loader2, Users, Gamepad2, User } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
@@ -65,7 +65,28 @@ export default function Home() {
         </div>
 
         {/* Main Cards */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Solo Play Card */}
+          <Card className="bg-slate-800/50 border-purple-500/30 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <User className="w-6 h-6 text-purple-400" />
+                Solo Practice
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                Practice on your own and learn about cultures
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => setLocation("/solo")}
+                className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-6 text-lg"
+              >
+                <User className="mr-2 h-5 w-5" />
+                Play Solo
+              </Button>
+            </CardContent>
+          </Card>
           {/* Create Room Card */}
           <Card className="bg-slate-800/50 border-teal-500/30 backdrop-blur">
             <CardHeader>

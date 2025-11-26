@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import HostDisplay from "./pages/HostDisplay";
 import PlayerController from "./pages/PlayerController";
+import SoloPlay from "./pages/SoloPlay";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -15,6 +16,7 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path="/host/:roomCode" component={HostDisplay} />
       <Route path="/play/:roomCode" component={PlayerController} />
+      <Route path="/solo" component={SoloPlay} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
