@@ -17,12 +17,55 @@ export const appRouter = router({
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  game: router({
+    createRoom: publicProcedure.mutation(async ({ ctx }) => {
+      const { createGameRoom } = await import("./gameDb");
+      const userId = ctx.user?.id || 0;
+      return await createGameRoom(userId);
+    }),
+    joinRoom: publicProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null && "roomCode" in val && "playerName" in val) {
+          return val as { roomCode: string; playerName: string };
+        }
+        throw new Error("Invalid input");
+      })
+      .mutation(async ({ input, ctx }) => {
+        const { getGameRoomByCode, createPlayer } = await import("./gameDb");
+        const room = await getGameRoomByCode(input.roomCode);
+        if (!room) throw new Error("Room not found");
+        
+        const playerId = await createPlayer({
+          gameRoomId: room.id,
+          userId: ctx.user?.id,
+          playerName: input.playerName,
+          isReady: 0,
+        });
+        
+        return { roomId: room.id, playerId };
+      }),
+    getCulturalPacks: publicProcedure.query(async () => {
+      const { getAllCulturalPacks } = await import("./gameDb");
+      return await getAllCulturalPacks();
+    }),
+    getRoomState: publicProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null && "roomCode" in val) {
+          return val as { roomCode: string };
+        }
+        throw new Error("Invalid input");
+      })
+      .query(async ({ input }) => {
+        const { getGameRoomByCode, getTeamsByGameRoom, getPlayersByGameRoom } = await import("./gameDb");
+        const room = await getGameRoomByCode(input.roomCode);
+        if (!room) throw new Error("Room not found");
+        
+        const teams = await getTeamsByGameRoom(room.id);
+        const players = await getPlayersByGameRoom(room.id);
+        
+        return { room, teams, players };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

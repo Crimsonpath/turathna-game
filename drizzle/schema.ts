@@ -25,4 +25,86 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+// Game rooms
+export const gameRooms = mysqlTable("game_rooms", {
+  id: int("id").autoincrement().primaryKey(),
+  roomCode: varchar("room_code", { length: 6 }).notNull().unique(),
+  hostUserId: int("host_user_id").notNull(),
+  status: mysqlEnum("status", ["lobby", "playing", "finished"]).default("lobby").notNull(),
+  currentRound: int("current_round").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+// Teams in a game
+export const teams = mysqlTable("teams", {
+  id: int("id").autoincrement().primaryKey(),
+  gameRoomId: int("game_room_id").notNull(),
+  teamName: varchar("team_name", { length: 50 }).notNull(),
+  homeCulture: varchar("home_culture", { length: 50 }),
+  exchangeCulture: varchar("exchange_culture", { length: 50 }),
+  score: int("score").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Players in teams
+export const players = mysqlTable("players", {
+  id: int("id").autoincrement().primaryKey(),
+  gameRoomId: int("game_room_id").notNull(),
+  teamId: int("team_id"),
+  userId: int("user_id"),
+  playerName: varchar("player_name", { length: 100 }).notNull(),
+  isReady: int("is_ready").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Cultural packs
+export const culturalPacks = mysqlTable("cultural_packs", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  nameAr: varchar("name_ar", { length: 100 }),
+  description: text("description"),
+  iconUrl: varchar("icon_url", { length: 500 }),
+  isPremium: int("is_premium").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Questions
+export const questions = mysqlTable("questions", {
+  id: int("id").autoincrement().primaryKey(),
+  culturalPackId: int("cultural_pack_id").notNull(),
+  questionText: text("question_text").notNull(),
+  questionTextAr: text("question_text_ar"),
+  questionType: mysqlEnum("question_type", ["multiple_choice", "numerical", "find_link"]).notNull(),
+  correctAnswer: varchar("correct_answer", { length: 500 }).notNull(),
+  options: text("options"), // JSON array
+  optionsAr: text("options_ar"), // JSON array
+  difficulty: mysqlEnum("difficulty", ["easy", "medium", "hard"]).default("medium").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Player answers
+export const playerAnswers = mysqlTable("player_answers", {
+  id: int("id").autoincrement().primaryKey(),
+  gameRoomId: int("game_room_id").notNull(),
+  playerId: int("player_id").notNull(),
+  questionId: int("question_id").notNull(),
+  roundNumber: int("round_number").notNull(),
+  answer: varchar("answer", { length: 500 }),
+  isCorrect: int("is_correct"),
+  pointsEarned: int("points_earned").default(0).notNull(),
+  answeredAt: timestamp("answered_at").defaultNow().notNull(),
+});
+
+export type GameRoom = typeof gameRooms.$inferSelect;
+export type InsertGameRoom = typeof gameRooms.$inferInsert;
+export type Team = typeof teams.$inferSelect;
+export type InsertTeam = typeof teams.$inferInsert;
+export type Player = typeof players.$inferSelect;
+export type InsertPlayer = typeof players.$inferInsert;
+export type CulturalPack = typeof culturalPacks.$inferSelect;
+export type InsertCulturalPack = typeof culturalPacks.$inferInsert;
+export type Question = typeof questions.$inferSelect;
+export type InsertQuestion = typeof questions.$inferInsert;
+export type PlayerAnswer = typeof playerAnswers.$inferSelect;
+export type InsertPlayerAnswer = typeof playerAnswers.$inferInsert;
