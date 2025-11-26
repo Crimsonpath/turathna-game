@@ -1,0 +1,26 @@
+{
+  "query": "SELECT cp.name, COUNT(q.id) as question_count \nFROM cultural_packs cp \nLEFT JOIN questions q ON cp.id = q.cultural_pack_id \nGROUP BY cp.id \nORDER BY cp.id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user Gdk1Qf5WGeescxd.root --database FHMMTEeLZfRGwfAiKapt5f --execute SELECT cp.name, COUNT(q.id) as question_count \nFROM cultural_packs cp \nLEFT JOIN questions q ON cp.id = q.cultural_pack_id \nGROUP BY cp.id \nORDER BY cp.id",
+  "rows": [
+    {
+      "name": "Egypt",
+      "question_count": "13"
+    },
+    {
+      "name": "Japan",
+      "question_count": "13"
+    },
+    {
+      "name": "Mexico",
+      "question_count": "13"
+    },
+    {
+      "name": "Kuwait",
+      "question_count": "13"
+    }
+  ],
+  "messages": [],
+  "stdout": "name\tquestion_count\nEgypt\t13\nJapan\t13\nMexico\t13\nKuwait\t13\n",
+  "stderr": "",
+  "execution_time_ms": 1579
+}

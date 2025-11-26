@@ -1,0 +1,8 @@
+{
+  "query": "SELECT cp.name, cp.nameAr, COUNT(q.id) as question_count \nFROM cultural_packs cp \nLEFT JOIN questions q ON cp.id = q.culturalPackId \nGROUP BY cp.id, cp.name, cp.nameAr \nORDER BY cp.id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user Gdk1Qf5WGeescxd.root --database FHMMTEeLZfRGwfAiKapt5f --execute SELECT cp.name, cp.nameAr, COUNT(q.id) as question_count \nFROM cultural_packs cp \nLEFT JOIN questions q ON cp.id = q.culturalPackId \nGROUP BY cp.id, cp.name, cp.nameAr \nORDER BY cp.id",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'q.culturalpackid' in 'on clause'"
+  ]
+}
