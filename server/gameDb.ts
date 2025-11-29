@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import {
   gameRooms,
@@ -7,12 +7,16 @@ import {
   culturalPacks,
   questions,
   playerAnswers,
+  gameSessions,
+  playerLifelines,
   InsertGameRoom,
   InsertTeam,
   InsertPlayer,
   InsertCulturalPack,
   InsertQuestion,
   InsertPlayerAnswer,
+  InsertGameSession,
+  InsertPlayerLifeline,
 } from "../drizzle/schema";
 
 // Generate a random 6-character room code
@@ -219,4 +223,208 @@ export async function getPlayerAnswersByRound(
         eq(playerAnswers.roundNumber, roundNumber)
       )
     );
+}
+
+// Game Session operations
+export async function createGameSession(data: InsertGameSession) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(gameSessions).values(data);
+  return Number(result[0].insertId);
+}
+
+export async function getGameSessionByRoomId(gameRoomId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select()
+    .from(gameSessions)
+    .where(eq(gameSessions.gameRoomId, gameRoomId))
+    .limit(1);
+
+  return result[0] || null;
+}
+
+export async function updateGameSessionQuestionIndex(
+  sessionId: number,
+  questionIndex: number
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(gameSessions)
+    .set({
+      currentQuestionIndex: questionIndex,
+      questionStartedAt: sql`NOW()`
+    })
+    .where(eq(gameSessions.id, sessionId));
+}
+
+export async function updateGameSessionRoundType(
+  sessionId: number,
+  roundType: "standard" | "speed" | "final"
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(gameSessions)
+    .set({ roundType })
+    .where(eq(gameSessions.id, sessionId));
+}
+
+// Player score operations
+export async function updatePlayerScore(playerId: number, score: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(players)
+    .set({ score })
+    .where(eq(players.id, playerId));
+}
+
+export async function incrementPlayerScore(playerId: number, points: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(players)
+    .set({ score: sql`score + ${points}` })
+    .where(eq(players.id, playerId));
+}
+
+// Lifeline operations
+export async function useLifeline(data: InsertPlayerLifeline) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(playerLifelines).values(data);
+  return Number(result[0].insertId);
+}
+
+export async function getPlayerLifelines(gameRoomId: number, playerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(playerLifelines)
+    .where(
+      and(
+        eq(playerLifelines.gameRoomId, gameRoomId),
+        eq(playerLifelines.playerId, playerId)
+      )
+    );
+}
+
+export async function hasUsedLifeline(
+  gameRoomId: number,
+  playerId: number,
+  lifelineType: "fifty_fifty" | "ask_native" | "translate"
+) {
+  const db = await getDb();
+  if (!db) return true; // Return true to prevent use if db unavailable
+
+  const result = await db
+    .select()
+    .from(playerLifelines)
+    .where(
+      and(
+        eq(playerLifelines.gameRoomId, gameRoomId),
+        eq(playerLifelines.playerId, playerId),
+        eq(playerLifelines.lifelineType, lifelineType)
+      )
+    )
+    .limit(1);
+
+  return result.length > 0;
+}
+
+// Get questions by IDs
+export async function getQuestionsByIds(questionIds: number[]) {
+  const db = await getDb();
+  if (!db) return [];
+
+  if (questionIds.length === 0) return [];
+
+  return await db
+    .select()
+    .from(questions)
+    .where(inArray(questions.id, questionIds));
+}
+
+// Get single question by ID
+export async function getQuestionById(questionId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select()
+    .from(questions)
+    .where(eq(questions.id, questionId))
+    .limit(1);
+
+  return result[0] || null;
+}
+
+// Get player answers for a specific question
+export async function getPlayerAnswersForQuestion(
+  gameRoomId: number,
+  questionId: number
+) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(playerAnswers)
+    .where(
+      and(
+        eq(playerAnswers.gameRoomId, gameRoomId),
+        eq(playerAnswers.questionId, questionId)
+      )
+    );
+}
+
+// Get all player answers for a game room
+export async function getAllPlayerAnswers(gameRoomId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(playerAnswers)
+    .where(eq(playerAnswers.gameRoomId, gameRoomId));
+}
+
+// Get player by ID
+export async function getPlayerById(playerId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select()
+    .from(players)
+    .where(eq(players.id, playerId))
+    .limit(1);
+
+  return result[0] || null;
+}
+
+// Get game room by ID
+export async function getGameRoomById(roomId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select()
+    .from(gameRooms)
+    .where(eq(gameRooms.id, roomId))
+    .limit(1);
+
+  return result[0] || null;
 }

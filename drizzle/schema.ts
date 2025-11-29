@@ -55,6 +55,7 @@ export const players = mysqlTable("players", {
   userId: int("user_id"),
   playerName: varchar("player_name", { length: 100 }).notNull(),
   isReady: int("is_ready").default(0).notNull(),
+  score: int("score").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -96,6 +97,28 @@ export const playerAnswers = mysqlTable("player_answers", {
   answeredAt: timestamp("answered_at").defaultNow().notNull(),
 });
 
+// Game sessions - tracks active game state
+export const gameSessions = mysqlTable("game_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  gameRoomId: int("game_room_id").notNull(),
+  culturalPackId: int("cultural_pack_id").notNull(),
+  currentQuestionIndex: int("current_question_index").default(0).notNull(),
+  questionIds: text("question_ids").notNull(), // JSON array of question IDs
+  questionStartedAt: timestamp("question_started_at"),
+  roundType: mysqlEnum("round_type", ["standard", "speed", "final"]).default("standard").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Player lifelines - tracks lifelines used by each player
+export const playerLifelines = mysqlTable("player_lifelines", {
+  id: int("id").autoincrement().primaryKey(),
+  gameRoomId: int("game_room_id").notNull(),
+  playerId: int("player_id").notNull(),
+  lifelineType: mysqlEnum("lifeline_type", ["fifty_fifty", "ask_native", "translate"]).notNull(),
+  usedOnQuestionId: int("used_on_question_id").notNull(),
+  usedAt: timestamp("used_at").defaultNow().notNull(),
+});
+
 export type GameRoom = typeof gameRooms.$inferSelect;
 export type InsertGameRoom = typeof gameRooms.$inferInsert;
 export type Team = typeof teams.$inferSelect;
@@ -108,3 +131,7 @@ export type Question = typeof questions.$inferSelect;
 export type InsertQuestion = typeof questions.$inferInsert;
 export type PlayerAnswer = typeof playerAnswers.$inferSelect;
 export type InsertPlayerAnswer = typeof playerAnswers.$inferInsert;
+export type GameSession = typeof gameSessions.$inferSelect;
+export type InsertGameSession = typeof gameSessions.$inferInsert;
+export type PlayerLifeline = typeof playerLifelines.$inferSelect;
+export type InsertPlayerLifeline = typeof playerLifelines.$inferInsert;
