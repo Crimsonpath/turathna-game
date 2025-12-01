@@ -9,7 +9,6 @@ import {
   playerAnswers,
   gameSessions,
   playerLifelines,
-  InsertGameRoom,
   InsertTeam,
   InsertPlayer,
   InsertCulturalPack,
@@ -40,9 +39,9 @@ export async function createGameRoom(hostUserId: number) {
     hostUserId,
     status: "lobby",
     currentRound: 0,
-  });
+  }).returning({ id: gameRooms.id });
 
-  return { roomCode, id: Number(result[0].insertId) };
+  return { roomCode, id: result[0].id };
 }
 
 export async function getGameRoomByCode(roomCode: string) {
@@ -86,8 +85,8 @@ export async function createTeam(data: InsertTeam) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(teams).values(data);
-  return Number(result[0].insertId);
+  const result = await db.insert(teams).values(data).returning({ id: teams.id });
+  return result[0].id;
 }
 
 export async function getTeamsByGameRoom(gameRoomId: number) {
@@ -129,8 +128,8 @@ export async function createPlayer(data: InsertPlayer) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(players).values(data);
-  return Number(result[0].insertId);
+  const result = await db.insert(players).values(data).returning({ id: players.id });
+  return result[0].id;
 }
 
 export async function getPlayersByGameRoom(gameRoomId: number) {
@@ -175,8 +174,8 @@ export async function createCulturalPack(data: InsertCulturalPack) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(culturalPacks).values(data);
-  return Number(result[0].insertId);
+  const result = await db.insert(culturalPacks).values(data).returning({ id: culturalPacks.id });
+  return result[0].id;
 }
 
 // Question operations
@@ -194,8 +193,8 @@ export async function createQuestion(data: InsertQuestion) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(questions).values(data);
-  return Number(result[0].insertId);
+  const result = await db.insert(questions).values(data).returning({ id: questions.id });
+  return result[0].id;
 }
 
 // Player Answer operations
@@ -203,8 +202,8 @@ export async function createPlayerAnswer(data: InsertPlayerAnswer) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(playerAnswers).values(data);
-  return Number(result[0].insertId);
+  const result = await db.insert(playerAnswers).values(data).returning({ id: playerAnswers.id });
+  return result[0].id;
 }
 
 export async function getPlayerAnswersByRound(
@@ -230,8 +229,8 @@ export async function createGameSession(data: InsertGameSession) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(gameSessions).values(data);
-  return Number(result[0].insertId);
+  const result = await db.insert(gameSessions).values(data).returning({ id: gameSessions.id });
+  return result[0].id;
 }
 
 export async function getGameSessionByRoomId(gameRoomId: number) {
@@ -302,8 +301,8 @@ export async function useLifeline(data: InsertPlayerLifeline) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(playerLifelines).values(data);
-  return Number(result[0].insertId);
+  const result = await db.insert(playerLifelines).values(data).returning({ id: playerLifelines.id });
+  return result[0].id;
 }
 
 export async function getPlayerLifelines(gameRoomId: number, playerId: number) {

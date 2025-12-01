@@ -1,10 +1,12 @@
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { questions } from "../drizzle/schema.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const db = drizzle(process.env.DATABASE_URL);
+const client = postgres(process.env.DATABASE_URL);
+const db = drizzle(client);
 
 const expandedQuestions = [
   // ========== EGYPT QUESTIONS (30 more) ==========
@@ -431,7 +433,8 @@ async function seedExpandedQuestions() {
   console.log("- Mexico: 10 additional questions");
   console.log("- Kuwait: 10 additional questions");
   console.log("Total: 40 new questions added");
-  
+
+  await client.end();
   process.exit(0);
 }
 
